@@ -1,0 +1,1958 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ORB Scanner - Three Separate Alerts</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #1a1a1a;
+            color: #ffffff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .navbar {
+            background-color: #2d2d2d !important;
+            border-bottom: 2px solid #4CAF50;
+        }
+        
+        .card {
+            background-color: #2d2d2d;
+            border: 1px solid #404040;
+            border-radius: 8px;
+        }
+        
+        .card-header {
+            background-color: #404040;
+            border-bottom: 1px solid #555;
+            color: #ffffff;
+        }
+        
+        .table {
+            color: #ffffff;
+        }
+        
+        .table thead th {
+            background-color: #404040;
+            border-color: #555;
+            color: #ffffff;
+        }
+        
+        .table tbody tr {
+            background-color: #2d2d2d;
+        }
+        
+        .table tbody tr:hover {
+            background-color: #404040;
+            cursor: pointer;
+        }
+        
+        .table tbody tr.selected {
+            background-color: #4CAF50 !important;
+            color: white;
+        }
+        
+        .btn-primary {
+            background-color: #4CAF50;
+            border-color: #4CAF50;
+        }
+        
+        .btn-primary:hover {
+            background-color: #45a049;
+            border-color: #45a049;
+        }
+        
+        .btn-secondary {
+            background-color: #666;
+            border-color: #666;
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        
+        .status-active {
+            background-color: #4CAF50;
+        }
+        
+        .status-inactive {
+            background-color: #f44336;
+        }
+        
+        .trend-up {
+            color: #4CAF50;
+            font-weight: bold;
+        }
+        
+        .trend-down {
+            color: #f44336;
+            font-weight: bold;
+        }
+        
+        .trend-neutral {
+            color: #ff9800;
+        }
+        
+        .loading {
+            display: none;
+        }
+        
+        .filters-panel {
+            background-color: #2d2d2d;
+            border: 1px solid #404040;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .filter-item {
+            margin-bottom: 15px;
+        }
+        
+        .filter-label {
+            font-weight: bold;
+            color: #4CAF50;
+            display: block;
+            margin-bottom: 5px;
+        }
+        
+        .form-select {
+            background-color: #404040;
+            border: 1px solid #555;
+            color: #ffffff;
+        }
+        
+        .form-select:focus {
+            background-color: #404040;
+            border-color: #4CAF50;
+            color: #ffffff;
+            box-shadow: 0 0 0 0.2rem rgba(76, 175, 80, 0.25);
+        }
+        
+        .form-select option {
+            background-color: #404040;
+            color: #ffffff;
+        }
+        
+        .results-count {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #4CAF50;
+        }
+        
+        .last-scan {
+            font-size: 0.9em;
+            color: #888;
+        }
+        
+        .market-status {
+            font-size: 0.9em;
+            padding: 5px 10px;
+            border-radius: 4px;
+            margin-left: 10px;
+        }
+        
+        .market-open {
+            background-color: #4CAF50;
+            color: white;
+        }
+        
+        .market-closed {
+            background-color: #f44336;
+            color: white;
+        }
+        
+        .auto-scan-status {
+            background-color: #2d2d2d;
+            border: 1px solid #404040;
+            border-radius: 8px;
+            padding: 10px;
+            margin-top: 10px;
+        }
+        
+        .auto-scan-indicator {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 5px;
+        }
+        
+        .auto-scan-active {
+            background-color: #4CAF50;
+        }
+        
+        .auto-scan-inactive {
+            background-color: #f44336;
+        }
+        
+        .discord-status {
+            font-size: 0.8em;
+            color: #888;
+            margin-top: 5px;
+        }
+        
+        .alert-types {
+            background-color: #2d2d2d;
+            border: 1px solid #404040;
+            border-radius: 8px;
+            padding: 10px;
+            margin-top: 10px;
+        }
+        
+        .alert-type {
+            margin-bottom: 8px;
+            font-size: 0.9em;
+            padding: 5px;
+            border-radius: 4px;
+        }
+        
+        .alert-type-1 {
+            background-color: #2d4d2d;
+            border-left: 3px solid #4CAF50;
+        }
+        
+        .alert-type-2 {
+            background-color: #4d2d2d;
+            border-left: 3px solid #ff9800;
+        }
+        
+        .alert-type-3 {
+            background-color: #2d2d4d;
+            border-left: 3px solid #2196F3;
+        }
+        
+        /* Ticker Details Panel */
+        .ticker-details {
+            background-color: #2d2d2d;
+            border: 1px solid #404040;
+            border-radius: 8px;
+            padding: 15px;
+            height: 100%;
+        }
+        
+        .ticker-details h5 {
+            color: #4CAF50;
+            margin-bottom: 15px;
+        }
+        
+        .detail-item {
+            margin-bottom: 10px;
+            padding: 8px;
+            background-color: #404040;
+            border-radius: 4px;
+        }
+        
+        .detail-label {
+            font-weight: bold;
+            color: #4CAF50;
+            font-size: 0.9em;
+        }
+        
+        .detail-value {
+            font-size: 1.1em;
+            margin-top: 2px;
+        }
+        
+        .news-item {
+            background-color: #404040;
+            border-radius: 4px;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-left: 3px solid #4CAF50;
+        }
+        
+        .news-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .news-time {
+            font-size: 0.8em;
+            color: #888;
+        }
+        
+        /* Alert Popup Styles */
+        .alert-popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #2d2d2d;
+            border: 2px solid #4CAF50;
+            border-radius: 10px;
+            padding: 20px;
+            z-index: 9999;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            max-width: 400px;
+            display: none;
+        }
+        
+        .alert-popup.show {
+            display: block;
+            animation: popupFadeIn 0.3s ease-in-out;
+        }
+        
+        @keyframes popupFadeIn {
+            from { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+            to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+        }
+        
+        .alert-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .alert-title {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #4CAF50;
+        }
+        
+        .alert-close {
+            background: none;
+            border: none;
+            color: #888;
+            font-size: 1.5em;
+            cursor: pointer;
+        }
+        
+        .alert-close:hover {
+            color: #f44336;
+        }
+        
+        .alert-content {
+            margin-bottom: 15px;
+        }
+        
+        .alert-symbol {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #4CAF50;
+        }
+        
+        .alert-price {
+            font-size: 1.2em;
+            margin: 5px 0;
+        }
+        
+        .alert-change {
+            font-size: 1.1em;
+            margin: 5px 0;
+        }
+        
+        .alert-volume {
+            font-size: 1em;
+            color: #888;
+        }
+        
+        .alert-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn-sm {
+            padding: 5px 15px;
+            font-size: 0.9em;
+        }
+        
+        /* Alert Type Colors */
+        .alert-type-1-border {
+            border-color: #4CAF50 !important;
+        }
+        
+        .alert-type-2-border {
+            border-color: #ff9800 !important;
+        }
+        
+        .alert-type-3-border {
+            border-color: #2196F3 !important;
+        }
+        
+        .alert-type-1-color {
+            color: #4CAF50 !important;
+        }
+        
+        .alert-type-2-color {
+            color: #ff9800 !important;
+        }
+        
+        .alert-type-3-color {
+            color: #2196F3 !important;
+        }
+        
+        /* Technical Indicators Panel */
+        .technical-indicators {
+            background-color: #2d2d2d;
+            border: 1px solid #404040;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+        
+        .indicator-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .indicator-item {
+            background-color: #404040;
+            border-radius: 4px;
+            padding: 8px;
+            text-align: center;
+        }
+        
+        .indicator-label {
+            font-size: 0.8em;
+            color: #888;
+            margin-bottom: 3px;
+        }
+        
+        .indicator-value {
+            font-size: 1.1em;
+            font-weight: bold;
+        }
+        
+        .rsi-overbought {
+            color: #f44336;
+        }
+        
+        .rsi-oversold {
+            color: #4CAF50;
+        }
+        
+        .rsi-neutral {
+            color: #ff9800;
+        }
+        
+        .macd-bullish {
+            color: #4CAF50;
+        }
+        
+        .macd-bearish {
+            color: #f44336;
+        }
+        
+        .volume-high {
+            color: #4CAF50;
+        }
+        
+        .volume-low {
+            color: #f44336;
+        }
+        
+        .volume-normal {
+            color: #ff9800;
+        }
+        
+        /* Pattern Recognition */
+        .pattern-indicators {
+            background-color: #2d2d2d;
+            border: 1px solid #404040;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+        
+        .pattern-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 5px 0;
+            border-bottom: 1px solid #404040;
+        }
+        
+        .pattern-item:last-child {
+            border-bottom: none;
+        }
+        
+        .pattern-name {
+            font-size: 0.9em;
+        }
+        
+        .pattern-status {
+            font-size: 0.8em;
+            padding: 2px 6px;
+            border-radius: 3px;
+        }
+        
+        .pattern-detected {
+            background-color: #4CAF50;
+            color: white;
+        }
+        
+        .pattern-not-detected {
+            background-color: #666;
+            color: #ccc;
+        }
+        
+        /* Risk Management Panel */
+        .risk-management {
+            background-color: #2d2d2d;
+            border: 1px solid #404040;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+        
+        .risk-score {
+            font-size: 1.5em;
+            font-weight: bold;
+            text-align: center;
+            margin: 10px 0;
+        }
+        
+        .risk-low {
+            color: #4CAF50;
+        }
+        
+        .risk-medium {
+            color: #ff9800;
+        }
+        
+        .risk-high {
+            color: #f44336;
+        }
+        
+        .risk-factors {
+            font-size: 0.9em;
+            margin-top: 10px;
+        }
+        
+        .risk-factor {
+            margin: 5px 0;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-size: 0.8em;
+        }
+        
+        .risk-factor-positive {
+            background-color: #2d4d2d;
+            color: #4CAF50;
+        }
+        
+        .risk-factor-negative {
+            background-color: #4d2d2d;
+            color: #f44336;
+        }
+        
+        /* Market Sentiment */
+        .market-sentiment {
+            background-color: #2d2d2d;
+            border: 1px solid #404040;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+        
+        .sentiment-meter {
+            width: 100%;
+            height: 20px;
+            background-color: #404040;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        
+        .sentiment-fill {
+            height: 100%;
+            transition: width 0.3s ease;
+        }
+        
+        .sentiment-bullish {
+            background: linear-gradient(90deg, #4CAF50, #45a049);
+        }
+        
+        .sentiment-bearish {
+            background: linear-gradient(90deg, #f44336, #d32f2f);
+        }
+        
+        .sentiment-neutral {
+            background: linear-gradient(90deg, #ff9800, #f57c00);
+        }
+        
+        /* Range Slider Styles for Quick Filters */
+        .range-slider {
+            width: 100%;
+            margin: 10px 0;
+        }
+        
+        .range-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8em;
+            color: #888;
+        }
+        
+
+        
+
+    </style>
+</head>
+<body>
+    <!-- Alert Popup -->
+    <div id="alertPopup" class="alert-popup">
+        <div class="alert-header">
+            <div class="alert-title" id="alertTitle">
+                <i class="fas fa-bell"></i> Alert
+            </div>
+            <button class="alert-close" onclick="closeAlert()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="alert-content">
+            <div class="alert-symbol" id="alertSymbol">SYMBOL</div>
+            <div class="alert-price" id="alertPrice">$0.00</div>
+            <div class="alert-change" id="alertChange">+0.00%</div>
+            <div class="alert-volume" id="alertVolume">Volume: 0</div>
+            <div class="alert-description" id="alertDescription">
+                Alert description
+            </div>
+        </div>
+        <div class="alert-actions">
+            <button class="btn btn-primary btn-sm" onclick="viewDetails()">
+                <i class="fas fa-chart-line"></i> View Details
+            </button>
+            <button class="btn btn-secondary btn-sm" onclick="closeAlert()">
+                <i class="fas fa-times"></i> Dismiss
+            </button>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-chart-line"></i> ORB Scanner
+            </a>
+            <div class="navbar-nav ms-auto">
+                <span class="navbar-text">
+                    <span class="status-indicator" id="statusIndicator"></span>
+                    <span id="statusText">Ready</span>
+                    <span class="market-status" id="marketStatus">Market: Closed</span>
+                </span>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid mt-4">
+        <!-- Top Filters Panel -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-filter"></i> Quick Filters
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-2">
+                                <div class="filter-item">
+                                    <label class="filter-label">
+                                        <i class="fas fa-newspaper"></i> News Filter
+                                    </label>
+                                    <select class="form-select" id="newsFilter">
+                                        <option value="both">Both (All Stocks)</option>
+                                        <option value="yes">Yes (News Only)</option>
+                                        <option value="no">No (No News)</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="filter-item">
+                                    <label class="filter-label">
+                                        <i class="fas fa-chart-line"></i> VWAP Filter
+                                    </label>
+                                    <select class="form-select" id="vwapFilter">
+                                        <option value="both">Both (All)</option>
+                                        <option value="above">Above VWAP</option>
+                                        <option value="below">Below VWAP</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="filter-item">
+                                    <label class="filter-label">
+                                        <i class="fas fa-chart-area"></i> EMA9 Filter
+                                    </label>
+                                    <select class="form-select" id="ema9Filter">
+                                        <option value="both">Both (All)</option>
+                                        <option value="above">Above EMA9</option>
+                                        <option value="below">Below EMA9</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="filter-item">
+                                    <label class="filter-label">
+                                        <i class="fas fa-dollar-sign"></i> Price Range
+                                    </label>
+                                    <input type="range" class="range-slider" id="priceRange" min="0" max="100" value="50">
+                                    <div class="range-labels">
+                                        <span>$0</span>
+                                        <span>$100+</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="filter-item">
+                                    <label class="filter-label">
+                                        <i class="fas fa-volume-up"></i> Volume Range
+                                    </label>
+                                    <input type="range" class="range-slider" id="volumeRange" min="0" max="100" value="50">
+                                    <div class="range-labels">
+                                        <span>Low</span>
+                                        <span>High</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="auto-scan-status">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="results-count">
+                                        <span id="resultsCount">0</span> Results
+                                    </div>
+                                    <div class="last-scan" id="lastScanTime">
+                                        No scan performed yet
+                                    </div>
+                                </div>
+                                <div class="col-md-6 text-end">
+                                    <div class="auto-scan-info">
+                                        <span class="auto-scan-indicator" id="autoScanIndicator"></span>
+                                        <span id="autoScanStatus">Auto Scan: Active</span>
+                                        <br>
+                                        <small class="text-muted">Monday-Friday, 5AM-4PM EST</small>
+                                        <div class="discord-status">
+                                            <i class="fab fa-discord"></i> Discord Alerts: 3 Separate Types
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+
+                            
+                            <div class="alert-types">
+                                <div class="alert-type alert-type-1">
+                                    <strong>Alert Type 1:</strong> 3% from ORB High
+                                </div>
+                                <div class="alert-type alert-type-2">
+                                    <strong>Alert Type 2:</strong> New News Today
+                                </div>
+                                <div class="alert-type alert-type-3">
+                                    <strong>Alert Type 3:</strong> EMA9 Crossing Above VWAP
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results and Details -->
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-table"></i> Scan Results
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="loading" id="loadingSpinner">
+                            <div class="text-center">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                                <p class="mt-2">Scanning market...</p>
+                            </div>
+                        </div>
+                        
+                        <div id="resultsTable">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Symbol</th>
+                                        <th>Price</th>
+                                        <th>Change %</th>
+                                        <th>Volume</th>
+                                        <th>Dollar Volume</th>
+                                        <th>ORB High</th>
+                                        <th>ORB Low</th>
+                                        <th>VWAP</th>
+                                        <th>EMA9</th>
+                                        <th>News</th>
+                                        <th>Alerts</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="resultsBody">
+                                    <tr>
+                                        <td colspan="11" class="text-center text-muted">
+                                            Auto-scanning Monday-Friday during market hours...
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-info-circle"></i> Ticker Details
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="tickerDetails" class="ticker-details">
+                            <div class="text-center text-muted">
+                                <i class="fas fa-chart-line fa-3x mb-3"></i>
+                                <p>Select a stock from the table to view details</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Technical Indicators Panel -->
+                        <div class="technical-indicators" id="technicalIndicators" style="display: none;">
+                            <h6><i class="fas fa-chart-bar"></i> Technical Indicators</h6>
+                            <div class="indicator-grid" id="indicatorGrid">
+                                <!-- Indicators will be populated here -->
+                            </div>
+                        </div>
+                        
+                        <!-- Pattern Recognition Panel -->
+                        <div class="pattern-indicators" id="patternIndicators" style="display: none;">
+                            <h6><i class="fas fa-shapes"></i> Pattern Recognition</h6>
+                            <div id="patternList">
+                                <!-- Patterns will be populated here -->
+                            </div>
+                        </div>
+                        
+                        <!-- Risk Management Panel -->
+                        <div class="risk-management" id="riskManagement" style="display: none;">
+                            <h6><i class="fas fa-shield-alt"></i> Risk Assessment</h6>
+                            <div class="risk-score" id="riskScore">--</div>
+                            <div class="risk-factors" id="riskFactors">
+                                <!-- Risk factors will be populated here -->
+                            </div>
+                        </div>
+                        
+                        <!-- Market Sentiment Panel -->
+                        <div class="market-sentiment" id="marketSentiment" style="display: none;">
+                            <h6><i class="fas fa-brain"></i> Market Sentiment</h6>
+                            <div class="sentiment-meter">
+                                <div class="sentiment-fill" id="sentimentFill"></div>
+                            </div>
+                            <div class="text-center" id="sentimentText">Neutral</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // =============================================================================
+        // THREE SEPARATE ALERTS ORB SCANNER - INDEPENDENT ALERT TYPES
+        // =============================================================================
+        const SECURE_API_BASE_URL = 'https://king-prawn-app-zavmj.ondigitalocean.app';
+        const DISCORD_WEBHOOK_URL = 'https://discord.com/api/webhooks/1394093082416255008/9AzNYp-1kZnbm4a4m1PmAsLh8D3AGGeL4PxsQL5unT1f6k0P_NMof3wa7tU_LwfF0GGg';
+        
+        class ORBScannerThreeAlerts {
+            constructor() {
+                this.isScanning = false;
+                this.isAutoScanning = false;
+                this.results = [];
+                this.lastScanTime = null;
+                this.scanInterval = null;
+                this.lastResults = new Map();
+                this.selectedTicker = null;
+                this.newsData = new Map();
+                this.alertQueue = [];
+                this.isShowingAlert = false;
+                this.discordAlertedStocks = new Map(); // Track alerts per stock per type
+                this.todayNews = new Map(); // Track today's news
+                this.technicalData = new Map(); // Store technical indicators
+                this.patternData = new Map(); // Store pattern recognition data
+                this.riskData = new Map(); // Store risk assessment data
+                this.sentimentData = new Map(); // Store sentiment analysis
+                
+                this.initializeEventListeners();
+                this.updateStatus();
+                this.updateMarketStatus();
+                this.initializeNewsData();
+                this.startAutoScan();
+            }
+            
+            initializeNewsData() {
+                // Simulate news data for demonstration
+                const tickers = ['AAPL', 'TSLA', 'MSFT', 'GOOGL', 'AMZN', 'NVDA', 'META', 'NFLX'];
+                tickers.forEach(ticker => {
+                    this.newsData.set(ticker, [
+                        {
+                            title: `${ticker} announces new product launch`,
+                            time: new Date().toLocaleTimeString(),
+                            source: 'MarketWatch',
+                            date: new Date().toDateString()
+                        },
+                        {
+                            title: `${ticker} reports strong quarterly earnings`,
+                            time: new Date(Date.now() - 3600000).toLocaleTimeString(),
+                            source: 'Reuters',
+                            date: new Date().toDateString()
+                        }
+                    ]);
+                    
+                    // Mark some stocks as having today's news
+                    if (Math.random() > 0.5) {
+                        this.todayNews.set(ticker, true);
+                    }
+                });
+            }
+            
+            initializeEventListeners() {
+                // Auto-scan starts automatically, no manual controls needed
+            }
+            
+            isMarketOpen() {
+                const now = new Date();
+                const estTime = new Date(now.toLocaleString("en-US", {timeZone: "America/New_York"}));
+                const hour = estTime.getHours();
+                const minute = estTime.getMinutes();
+                const currentTime = hour * 60 + minute;
+                
+                // Check if it's a weekday (Monday = 1, Friday = 5)
+                const dayOfWeek = estTime.getDay();
+                const isWeekday = dayOfWeek >= 1 && dayOfWeek <= 5;
+                
+                // Market hours: 5:00 AM (300) to 4:00 PM (960)
+                const isMarketHours = currentTime >= 300 && currentTime <= 960;
+                
+                return isWeekday && isMarketHours;
+            }
+            
+            updateMarketStatus() {
+                const marketStatus = document.getElementById('marketStatus');
+                const autoScanStatus = document.getElementById('autoScanStatus');
+                const autoScanIndicator = document.getElementById('autoScanIndicator');
+                const isOpen = this.isMarketOpen();
+                
+                if (isOpen) {
+                    marketStatus.textContent = 'Market: Open';
+                    marketStatus.className = 'market-status market-open';
+                    autoScanStatus.textContent = 'Auto Scan: Active';
+                    autoScanIndicator.className = 'auto-scan-indicator auto-scan-active';
+                } else {
+                    marketStatus.textContent = 'Market: Closed';
+                    marketStatus.className = 'market-status market-closed';
+                    autoScanStatus.textContent = 'Auto Scan: Paused (Market Closed)';
+                    autoScanIndicator.className = 'auto-scan-indicator auto-scan-inactive';
+                }
+            }
+            
+            startAutoScan() {
+                this.isAutoScanning = true;
+                this.updateMarketStatus();
+                
+                // Start scanning immediately if market is open
+                if (this.isMarketOpen()) {
+                    this.startScan();
+                }
+                
+                // Set up interval for continuous scanning
+                this.scanInterval = setInterval(() => {
+                    if (this.isMarketOpen()) {
+                        this.startScan();
+                    }
+                }, 30000); // Scan every 30 seconds
+                
+                // Update market status every minute
+                setInterval(() => {
+                    this.updateMarketStatus();
+                }, 60000);
+            }
+            
+            checkAlertType1(stock) {
+                // Alert Type 1: Stock is 3% from ORB high
+                const distanceFromHigh = ((stock.orb_high - stock.price) / stock.orb_high) * 100;
+                return distanceFromHigh <= 3;
+            }
+            
+            checkAlertType2(stock) {
+                // Alert Type 2: Has new news for today
+                return this.todayNews.has(stock.symbol);
+            }
+            
+            checkAlertType3(stock) {
+                // Alert Type 3: EMA9 is about to cross above VWAP
+                return stock.ema9 > stock.vwap * 0.995 && stock.ema9 < stock.vwap * 1.005;
+            }
+            
+            getAlertTypes(stock) {
+                return {
+                    type1: this.checkAlertType1(stock),
+                    type2: this.checkAlertType2(stock),
+                    type3: this.checkAlertType3(stock)
+                };
+            }
+            
+            async sendDiscordAlert(stock, alertType, description) {
+                try {
+                    const colors = {
+                        1: 0x4CAF50, // Green
+                        2: 0xff9800, // Orange
+                        3: 0x2196F3  // Blue
+                    };
+                    
+                    const titles = {
+                        1: '🚨 Alert Type 1: 3% from ORB High',
+                        2: '📰 Alert Type 2: New News Today',
+                        3: '📈 Alert Type 3: EMA9 Crossing Above VWAP'
+                    };
+                    
+                    const embed = {
+                        title: `${titles[alertType]} - ${stock.symbol}`,
+                        color: colors[alertType],
+                        fields: [
+                            {
+                                name: 'Symbol',
+                                value: stock.symbol,
+                                inline: true
+                            },
+                            {
+                                name: 'Price',
+                                value: `$${stock.price}`,
+                                inline: true
+                            },
+                            {
+                                name: 'Change',
+                                value: `${stock.change_percent >= 0 ? '+' : ''}${stock.change_percent}%`,
+                                inline: true
+                            },
+                            {
+                                name: 'ORB High',
+                                value: `$${stock.orb_high}`,
+                                inline: true
+                            },
+                            {
+                                name: 'VWAP',
+                                value: `$${stock.vwap}`,
+                                inline: true
+                            },
+                            {
+                                name: 'EMA9',
+                                value: `$${stock.ema9}`,
+                                inline: true
+                            },
+                            {
+                                name: 'Alert Description',
+                                value: description,
+                                inline: false
+                            }
+                        ],
+                        timestamp: new Date().toISOString(),
+                        footer: {
+                            text: `ORB Scanner - Alert Type ${alertType}`
+                        }
+                    };
+                    
+                    const payload = {
+                        embeds: [embed]
+                    };
+                    
+                    const response = await fetch(DISCORD_WEBHOOK_URL, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(payload)
+                    });
+                    
+                    if (response.ok) {
+                        console.log(`Discord alert type ${alertType} sent for ${stock.symbol}`);
+                    } else {
+                        console.error(`Failed to send Discord alert type ${alertType} for ${stock.symbol}`);
+                    }
+                } catch (error) {
+                    console.error('Error sending Discord alert:', error);
+                }
+            }
+            
+            showAlert(stock, alertType, description) {
+                // Add to alert queue
+                this.alertQueue.push({ stock, alertType, description });
+                this.processAlertQueue();
+            }
+            
+            processAlertQueue() {
+                if (this.isShowingAlert || this.alertQueue.length === 0) {
+                    return;
+                }
+                
+                this.isShowingAlert = true;
+                const { stock, alertType, description } = this.alertQueue.shift();
+                
+                const popup = document.getElementById('alertPopup');
+                const alertTitle = document.getElementById('alertTitle');
+                const symbol = document.getElementById('alertSymbol');
+                const price = document.getElementById('alertPrice');
+                const change = document.getElementById('alertChange');
+                const volume = document.getElementById('alertVolume');
+                const alertDescription = document.getElementById('alertDescription');
+                
+                // Set alert type styling
+                popup.className = `alert-popup alert-type-${alertType}-border`;
+                alertTitle.className = `alert-title alert-type-${alertType}-color`;
+                
+                const titles = {
+                    1: '🚨 3% from ORB High',
+                    2: '📰 New News Today',
+                    3: '📈 EMA9 Crossing Above VWAP'
+                };
+                
+                alertTitle.innerHTML = `<i class="fas fa-bell"></i> ${titles[alertType]}`;
+                symbol.textContent = stock.symbol;
+                price.textContent = `$${stock.price}`;
+                change.textContent = `${stock.change_percent >= 0 ? '+' : ''}${stock.change_percent}%`;
+                change.className = `alert-change ${stock.change_percent >= 0 ? 'trend-up' : 'trend-down'}`;
+                volume.textContent = `Volume: ${this.formatNumber(stock.volume)}`;
+                alertDescription.textContent = description;
+                
+                popup.classList.add('show');
+                
+                // Auto-dismiss after 10 seconds and show next alert
+                setTimeout(() => {
+                    this.closeAlert();
+                    setTimeout(() => {
+                        this.isShowingAlert = false;
+                        this.processAlertQueue();
+                    }, 1000);
+                }, 10000);
+            }
+            
+            closeAlert() {
+                const popup = document.getElementById('alertPopup');
+                popup.classList.remove('show');
+            }
+            
+            checkForAlerts(newResults) {
+                newResults.forEach(stock => {
+                    const alertTypes = this.getAlertTypes(stock);
+                    const stockKey = `${stock.symbol}_${Date.now()}`;
+                    
+                    // Check each alert type independently
+                    if (alertTypes.type1) {
+                        const distanceFromHigh = ((stock.orb_high - stock.price) / stock.orb_high * 100).toFixed(2);
+                        const description = `${stock.symbol} is ${distanceFromHigh}% from ORB high of $${stock.orb_high}`;
+                        this.showAlert(stock, 1, description);
+                        this.sendDiscordAlert(stock, 1, description);
+                    }
+                    
+                    if (alertTypes.type2) {
+                        const description = `${stock.symbol} has new news today - potential catalyst`;
+                        this.showAlert(stock, 2, description);
+                        this.sendDiscordAlert(stock, 2, description);
+                    }
+                    
+                    if (alertTypes.type3) {
+                        const description = `${stock.symbol} EMA9 ($${stock.ema9}) is crossing above VWAP ($${stock.vwap})`;
+                        this.showAlert(stock, 3, description);
+                        this.sendDiscordAlert(stock, 3, description);
+                    }
+                });
+                
+                // Update last results
+                this.lastResults.clear();
+                newResults.forEach(stock => {
+                    this.lastResults.set(stock.symbol, stock);
+                });
+            }
+            
+            async startScan() {
+                if (this.isScanning) return;
+                
+                this.isScanning = true;
+                this.updateStatus();
+                this.showLoading(true);
+                
+                try {
+                    const gainersResponse = await fetch(`${SECURE_API_BASE_URL}/api/gainers`);
+                    const gainersData = await gainersResponse.json();
+                    
+                    if (!gainersData.tickers || gainersData.tickers.length === 0) {
+                        throw new Error('No gainers data available');
+                    }
+                    
+                    // Get filter settings
+                    const newsFilter = document.getElementById('newsFilter').value;
+                    const vwapFilter = document.getElementById('vwapFilter').value;
+                    const ema9Filter = document.getElementById('ema9Filter').value;
+                    
+                    const results = [];
+                    
+                    for (const ticker of gainersData.tickers.slice(0, 20)) {
+                        try {
+                            const result = this.processTickerData(ticker, newsFilter, vwapFilter, ema9Filter);
+                            if (result) {
+                                results.push(result);
+                            }
+                        } catch (error) {
+                            console.warn(`Error processing ${ticker.ticker}:`, error);
+                        }
+                    }
+                    
+                    results.sort((a, b) => b.dollar_volume - a.dollar_volume);
+                    
+                    this.results = results;
+                    this.lastScanTime = new Date().toISOString();
+                    this.updateResults();
+                    this.updateStatus();
+                    this.checkForAlerts(results);
+                    
+                } catch (error) {
+                    console.error('Scan error:', error);
+                } finally {
+                    this.isScanning = false;
+                    this.showLoading(false);
+                    this.updateStatus();
+                }
+            }
+            
+            processTickerData(ticker, newsFilter, vwapFilter, ema9Filter) {
+                try {
+                    const symbol = ticker.ticker;
+                    const day = ticker.day;
+                    
+                    if (!day) return null;
+                    
+                    const currentPrice = day.c;
+                    const openPrice = day.o;
+                    const priceChange = ((currentPrice - openPrice) / openPrice) * 100;
+                    const volume = day.v;
+                    const dollarVolume = volume * currentPrice;
+                    const orbHigh = day.h;
+                    const orbLow = day.l;
+                    const vwap = day.vw;
+                    
+                    // Calculate EMA9 (simplified)
+                    const ema9 = this.calculateEMA9(day);
+                    
+                    // =============================================================================
+                    // MASTER FILTERS - Business Rules (Apply to Everyone)
+                    // =============================================================================
+                    
+                    // Master Filter 1: Minimum 1M volume
+                    if (volume < 1000000) {
+                        return null;
+                    }
+                    
+                    // Master Filter 2: Minimum 30% gain on the day
+                    if (priceChange < 30) {
+                        return null;
+                    }
+                    
+                    // Master Filter 3: Price range $0.50 - $15.00
+                    if (currentPrice < 0.50 || currentPrice > 15.00) {
+                        return null;
+                    }
+                    
+                    // =============================================================================
+                    // QUICK FILTERS - User Preferences (Personal Settings)
+                    // =============================================================================
+                    
+                    // Apply user's quick filters
+                    if (vwapFilter === 'above' && currentPrice <= vwap) return null;
+                    if (vwapFilter === 'below' && currentPrice >= vwap) return null;
+                    if (ema9Filter === 'above' && currentPrice <= ema9) return null;
+                    if (ema9Filter === 'below' && currentPrice >= ema9) return null;
+                    
+                    const hasNews = this.hasNews(symbol);
+                    if (newsFilter === 'yes' && !hasNews) return null;
+                    if (newsFilter === 'no' && hasNews) return null;
+                    
+                    const trend = currentPrice > openPrice ? 'UP' : currentPrice < openPrice ? 'DN' : '-';
+                    
+                    return {
+                        symbol: symbol,
+                        price: Math.round(currentPrice * 100) / 100,
+                        change_percent: Math.round(priceChange * 100) / 100,
+                        volume: volume,
+                        dollar_volume: Math.round(dollarVolume),
+                        orb_high: Math.round(orbHigh * 100) / 100,
+                        orb_low: Math.round(orbLow * 100) / 100,
+                        vwap: Math.round(vwap * 100) / 100,
+                        ema9: Math.round(ema9 * 100) / 100,
+                        trend: trend,
+                        has_news: hasNews
+                    };
+                    
+                } catch (error) {
+                    console.warn(`Error processing ticker data:`, error);
+                    return null;
+                }
+            }
+            
+            calculateEMA9(day) {
+                // Simplified EMA9 calculation
+                return day.c * 0.9 + day.o * 0.1;
+            }
+            
+            // Advanced Technical Indicators
+            calculateRSI(prices, period = 14) {
+                if (prices.length < period + 1) return null;
+                
+                let gains = 0, losses = 0;
+                for (let i = 1; i <= period; i++) {
+                    const change = prices[i] - prices[i-1];
+                    if (change > 0) gains += change;
+                    else losses -= change;
+                }
+                
+                const avgGain = gains / period;
+                const avgLoss = losses / period;
+                const rs = avgGain / avgLoss;
+                return 100 - (100 / (1 + rs));
+            }
+            
+            calculateMACD(prices, fastPeriod = 12, slowPeriod = 26, signalPeriod = 9) {
+                if (prices.length < slowPeriod) return null;
+                
+                const ema12 = this.calculateEMA(prices, fastPeriod);
+                const ema26 = this.calculateEMA(prices, slowPeriod);
+                const macdLine = ema12 - ema26;
+                const signalLine = this.calculateEMA([macdLine], signalPeriod);
+                const histogram = macdLine - signalLine;
+                
+                return {
+                    macd: macdLine,
+                    signal: signalLine,
+                    histogram: histogram
+                };
+            }
+            
+            calculateEMA(prices, period) {
+                const multiplier = 2 / (period + 1);
+                let ema = prices[0];
+                
+                for (let i = 1; i < prices.length; i++) {
+                    ema = (prices[i] * multiplier) + (ema * (1 - multiplier));
+                }
+                
+                return ema;
+            }
+            
+            calculateBollingerBands(prices, period = 20, stdDev = 2) {
+                if (prices.length < period) return null;
+                
+                const sma = prices.slice(-period).reduce((a, b) => a + b) / period;
+                const variance = prices.slice(-period).reduce((sum, price) => {
+                    return sum + Math.pow(price - sma, 2);
+                }, 0) / period;
+                const std = Math.sqrt(variance);
+                
+                return {
+                    upper: sma + (stdDev * std),
+                    middle: sma,
+                    lower: sma - (stdDev * std)
+                };
+            }
+            
+            calculateVolumeAnalysis(volumes) {
+                if (volumes.length === 0) return null;
+                
+                const avgVolume = volumes.reduce((a, b) => a + b) / volumes.length;
+                const currentVolume = volumes[volumes.length - 1];
+                const volumeRatio = currentVolume / avgVolume;
+                
+                return {
+                    volumeRatio: volumeRatio,
+                    avgVolume: avgVolume,
+                    currentVolume: currentVolume,
+                    signal: volumeRatio > 2 ? 'high' : volumeRatio < 0.5 ? 'low' : 'normal'
+                };
+            }
+            
+            detectPatterns(prices, volumes) {
+                const patterns = [];
+                
+                // Double Top Pattern
+                if (this.detectDoubleTop(prices)) {
+                    patterns.push({ name: 'Double Top', type: 'bearish', confidence: 0.7 });
+                }
+                
+                // Double Bottom Pattern
+                if (this.detectDoubleBottom(prices)) {
+                    patterns.push({ name: 'Double Bottom', type: 'bullish', confidence: 0.7 });
+                }
+                
+                // Head and Shoulders
+                if (this.detectHeadAndShoulders(prices)) {
+                    patterns.push({ name: 'Head & Shoulders', type: 'bearish', confidence: 0.8 });
+                }
+                
+                // Volume Spike
+                if (volumes && volumes.length > 0) {
+                    const volumeAnalysis = this.calculateVolumeAnalysis(volumes);
+                    if (volumeAnalysis && volumeAnalysis.signal === 'high') {
+                        patterns.push({ name: 'Volume Spike', type: 'neutral', confidence: 0.6 });
+                    }
+                }
+                
+                return patterns;
+            }
+            
+            detectDoubleTop(prices) {
+                if (prices.length < 10) return false;
+                
+                const peaks = [];
+                for (let i = 1; i < prices.length - 1; i++) {
+                    if (prices[i] > prices[i-1] && prices[i] > prices[i+1]) {
+                        peaks.push({ index: i, price: prices[i] });
+                    }
+                }
+                
+                if (peaks.length < 2) return false;
+                
+                const lastTwo = peaks.slice(-2);
+                const priceDiff = Math.abs(lastTwo[0].price - lastTwo[1].price) / lastTwo[0].price;
+                
+                return priceDiff < 0.02; // Within 2% of each other
+            }
+            
+            detectDoubleBottom(prices) {
+                if (prices.length < 10) return false;
+                
+                const troughs = [];
+                for (let i = 1; i < prices.length - 1; i++) {
+                    if (prices[i] < prices[i-1] && prices[i] < prices[i+1]) {
+                        troughs.push({ index: i, price: prices[i] });
+                    }
+                }
+                
+                if (troughs.length < 2) return false;
+                
+                const lastTwo = troughs.slice(-2);
+                const priceDiff = Math.abs(lastTwo[0].price - lastTwo[1].price) / lastTwo[0].price;
+                
+                return priceDiff < 0.02; // Within 2% of each other
+            }
+            
+            detectHeadAndShoulders(prices) {
+                if (prices.length < 15) return false;
+                
+                // Simplified H&S detection
+                const peaks = [];
+                for (let i = 1; i < prices.length - 1; i++) {
+                    if (prices[i] > prices[i-1] && prices[i] > prices[i+1]) {
+                        peaks.push({ index: i, price: prices[i] });
+                    }
+                }
+                
+                if (peaks.length < 3) return false;
+                
+                const lastThree = peaks.slice(-3);
+                // Check if middle peak is higher than the other two
+                return lastThree[1].price > lastThree[0].price && 
+                       lastThree[1].price > lastThree[2].price &&
+                       Math.abs(lastThree[0].price - lastThree[2].price) / lastThree[0].price < 0.05;
+            }
+            
+            calculateRiskScore(stock) {
+                let riskScore = 50; // Base score
+                const riskFactors = [];
+                
+                // Volatility risk
+                const priceChange = Math.abs(stock.change_percent);
+                if (priceChange > 10) {
+                    riskScore += 20;
+                    riskFactors.push({ factor: 'High Volatility', impact: 'negative' });
+                } else if (priceChange > 5) {
+                    riskScore += 10;
+                    riskFactors.push({ factor: 'Moderate Volatility', impact: 'negative' });
+                } else {
+                    riskScore -= 10;
+                    riskFactors.push({ factor: 'Low Volatility', impact: 'positive' });
+                }
+                
+                // Volume risk
+                const volumeRatio = stock.volume / 1000000; // Assuming 1M is average
+                if (volumeRatio < 0.5) {
+                    riskScore += 15;
+                    riskFactors.push({ factor: 'Low Volume', impact: 'negative' });
+                } else if (volumeRatio > 2) {
+                    riskScore -= 5;
+                    riskFactors.push({ factor: 'High Volume', impact: 'positive' });
+                }
+                
+                // Technical risk
+                if (stock.price < stock.vwap) {
+                    riskScore += 10;
+                    riskFactors.push({ factor: 'Below VWAP', impact: 'negative' });
+                } else {
+                    riskScore -= 5;
+                    riskFactors.push({ factor: 'Above VWAP', impact: 'positive' });
+                }
+                
+                return {
+                    score: Math.max(0, Math.min(100, riskScore)),
+                    factors: riskFactors
+                };
+            }
+            
+            calculateSentiment(stock) {
+                let sentimentScore = 50; // Neutral base
+                let sentimentText = 'Neutral';
+                
+                // Price momentum
+                if (stock.change_percent > 5) {
+                    sentimentScore += 25;
+                    sentimentText = 'Very Bullish';
+                } else if (stock.change_percent > 2) {
+                    sentimentScore += 15;
+                    sentimentText = 'Bullish';
+                } else if (stock.change_percent < -5) {
+                    sentimentScore -= 25;
+                    sentimentText = 'Very Bearish';
+                } else if (stock.change_percent < -2) {
+                    sentimentScore -= 15;
+                    sentimentText = 'Bearish';
+                }
+                
+                // Volume sentiment
+                const volumeRatio = stock.volume / 1000000;
+                if (volumeRatio > 2) {
+                    sentimentScore += 10;
+                } else if (volumeRatio < 0.5) {
+                    sentimentScore -= 10;
+                }
+                
+                // Technical sentiment
+                if (stock.price > stock.vwap && stock.price > stock.ema9) {
+                    sentimentScore += 10;
+                } else if (stock.price < stock.vwap && stock.price < stock.ema9) {
+                    sentimentScore -= 10;
+                }
+                
+                return {
+                    score: Math.max(0, Math.min(100, sentimentScore)),
+                    text: sentimentText
+                };
+            }
+            
+            hasNews(symbol) {
+                return this.newsData.has(symbol);
+            }
+            
+            updateResults() {
+                const tbody = document.getElementById('resultsBody');
+                const resultsCount = document.getElementById('resultsCount');
+                const lastScanTime = document.getElementById('lastScanTime');
+                
+                resultsCount.textContent = this.results.length;
+                
+                if (this.lastScanTime) {
+                    const scanDate = new Date(this.lastScanTime);
+                    lastScanTime.textContent = `Last scan: ${scanDate.toLocaleString()}`;
+                }
+                
+                if (this.results.length === 0) {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="11" class="text-center text-muted">
+                                No qualifying stocks found.
+                            </td>
+                        </tr>
+                    `;
+                    return;
+                }
+                
+                tbody.innerHTML = this.results.map(stock => {
+                    const alertTypes = this.getAlertTypes(stock);
+                    const alertIcons = [];
+                    
+                    if (alertTypes.type1) alertIcons.push('<i class="fas fa-bell text-success" title="3% from ORB High"></i>');
+                    if (alertTypes.type2) alertIcons.push('<i class="fas fa-newspaper text-warning" title="New News Today"></i>');
+                    if (alertTypes.type3) alertIcons.push('<i class="fas fa-chart-line text-info" title="EMA9 Crossing Above VWAP"></i>');
+                    
+                    const alertDisplay = alertIcons.length > 0 ? alertIcons.join(' ') : '<i class="fas fa-minus text-muted"></i>';
+                    
+                    return `
+                        <tr onclick="window.orbScanner.selectTicker('${stock.symbol}')" style="cursor: pointer;">
+                            <td><strong>${stock.symbol}</strong></td>
+                            <td>$${stock.price}</td>
+                            <td class="${stock.change_percent >= 0 ? 'trend-up' : 'trend-down'}">
+                                ${stock.change_percent >= 0 ? '+' : ''}${stock.change_percent}%
+                            </td>
+                            <td>${this.formatNumber(stock.volume)}</td>
+                            <td>$${this.formatNumber(stock.dollar_volume)}</td>
+                            <td>$${stock.orb_high}</td>
+                            <td>$${stock.orb_low}</td>
+                            <td>$${stock.vwap}</td>
+                            <td>$${stock.ema9}</td>
+                            <td>
+                                ${stock.has_news ? '<i class="fas fa-newspaper text-success"></i>' : '<i class="fas fa-minus text-muted"></i>'}
+                            </td>
+                            <td>${alertDisplay}</td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+            
+            selectTicker(symbol) {
+                this.selectedTicker = symbol;
+                this.updateTickerDetails(symbol);
+                
+                // Update table row selection
+                const rows = document.querySelectorAll('#resultsBody tr');
+                rows.forEach(row => row.classList.remove('selected'));
+                event.target.closest('tr').classList.add('selected');
+            }
+            
+            updateTickerDetails(symbol) {
+                const detailsContainer = document.getElementById('tickerDetails');
+                const stock = this.results.find(s => s.symbol === symbol);
+                
+                if (!stock) return;
+                
+                const alertTypes = this.getAlertTypes(stock);
+                const news = this.newsData.get(symbol) || [];
+                
+                // Generate sample price data for technical analysis
+                const samplePrices = this.generateSamplePrices(stock.price, stock.change_percent);
+                const sampleVolumes = this.generateSampleVolumes(stock.volume);
+                
+                // Calculate technical indicators
+                const rsi = this.calculateRSI(samplePrices);
+                const macd = this.calculateMACD(samplePrices);
+                const bollinger = this.calculateBollingerBands(samplePrices);
+                const volumeAnalysis = this.calculateVolumeAnalysis(sampleVolumes);
+                const patterns = this.detectPatterns(samplePrices, sampleVolumes);
+                const riskAssessment = this.calculateRiskScore(stock);
+                const sentiment = this.calculateSentiment(stock);
+                
+                // Store technical data
+                this.technicalData.set(symbol, { rsi, macd, bollinger, volumeAnalysis });
+                this.patternData.set(symbol, patterns);
+                this.riskData.set(symbol, riskAssessment);
+                this.sentimentData.set(symbol, sentiment);
+                
+                detailsContainer.innerHTML = `
+                    <h5><i class="fas fa-chart-line"></i> ${symbol}</h5>
+                    
+                    <div class="detail-item">
+                        <div class="detail-label">Current Price</div>
+                        <div class="detail-value">$${stock.price}</div>
+                    </div>
+                    
+                    <div class="detail-item">
+                        <div class="detail-label">Change</div>
+                        <div class="detail-value ${stock.change_percent >= 0 ? 'trend-up' : 'trend-down'}">
+                            ${stock.change_percent >= 0 ? '+' : ''}${stock.change_percent}%
+                        </div>
+                    </div>
+                    
+                    <div class="detail-item">
+                        <div class="detail-label">Volume</div>
+                        <div class="detail-value">${this.formatNumber(stock.volume)}</div>
+                    </div>
+                    
+                    <div class="detail-item">
+                        <div class="detail-label">Dollar Volume</div>
+                        <div class="detail-value">$${this.formatNumber(stock.dollar_volume)}</div>
+                    </div>
+                    
+                    <div class="detail-item">
+                        <div class="detail-label">ORB High</div>
+                        <div class="detail-value">$${stock.orb_high}</div>
+                    </div>
+                    
+                    <div class="detail-item">
+                        <div class="detail-label">ORB Low</div>
+                        <div class="detail-value">$${stock.orb_low}</div>
+                    </div>
+                    
+                    <div class="detail-item">
+                        <div class="detail-label">VWAP</div>
+                        <div class="detail-value">$${stock.vwap}</div>
+                    </div>
+                    
+                    <div class="detail-item">
+                        <div class="detail-label">EMA9</div>
+                        <div class="detail-value">$${stock.ema9}</div>
+                    </div>
+                    
+                    <div class="detail-item">
+                        <div class="detail-label">Trend</div>
+                        <div class="detail-value ${this.getTrendClass(stock.trend)}">${stock.trend}</div>
+                    </div>
+                    
+                    <div class="detail-item">
+                        <div class="detail-label">Alert Types</div>
+                        <div class="detail-value">
+                            <div class="${alertTypes.type1 ? 'condition-met' : 'condition-not-met'}">
+                                ${alertTypes.type1 ? '✓' : '✗'} 3% from ORB High
+                            </div>
+                            <div class="${alertTypes.type2 ? 'condition-met' : 'condition-not-met'}">
+                                ${alertTypes.type2 ? '✓' : '✗'} New News Today
+                            </div>
+                            <div class="${alertTypes.type3 ? 'condition-met' : 'condition-not-met'}">
+                                ${alertTypes.type3 ? '✓' : '✗'} EMA9 Crossing Above VWAP
+                            </div>
+                        </div>
+                    </div>
+                    
+                    ${news.length > 0 ? `
+                        <div class="detail-item">
+                            <div class="detail-label">Recent News</div>
+                            ${news.map(item => `
+                                <div class="news-item">
+                                    <div class="news-title">${item.title}</div>
+                                    <div class="news-time">${item.time} - ${item.source}</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    ` : ''}
+                `;
+                
+                // Update technical indicators panel
+                this.updateTechnicalIndicators(symbol);
+                this.updatePatternIndicators(symbol);
+                this.updateRiskManagement(symbol);
+                this.updateMarketSentiment(symbol);
+            }
+            
+            generateSamplePrices(currentPrice, changePercent) {
+                const prices = [];
+                const basePrice = currentPrice / (1 + changePercent / 100);
+                
+                for (let i = 0; i < 30; i++) {
+                    const randomChange = (Math.random() - 0.5) * 0.02; // ±1% random change
+                    const price = basePrice * (1 + randomChange);
+                    prices.push(price);
+                }
+                
+                // Add current price at the end
+                prices.push(currentPrice);
+                return prices;
+            }
+            
+            generateSampleVolumes(currentVolume) {
+                const volumes = [];
+                
+                for (let i = 0; i < 30; i++) {
+                    const randomFactor = 0.5 + Math.random() * 1.5; // 0.5x to 2x
+                    volumes.push(currentVolume * randomFactor);
+                }
+                
+                volumes.push(currentVolume);
+                return volumes;
+            }
+            
+            updateTechnicalIndicators(symbol) {
+                const technicalData = this.technicalData.get(symbol);
+                if (!technicalData) return;
+                
+                const indicatorGrid = document.getElementById('indicatorGrid');
+                const technicalPanel = document.getElementById('technicalIndicators');
+                
+                let indicatorsHTML = '';
+                
+                // RSI
+                if (technicalData.rsi) {
+                    const rsiClass = technicalData.rsi > 70 ? 'rsi-overbought' : 
+                                   technicalData.rsi < 30 ? 'rsi-oversold' : 'rsi-neutral';
+                    indicatorsHTML += `
+                        <div class="indicator-item">
+                            <div class="indicator-label">RSI</div>
+                            <div class="indicator-value ${rsiClass}">${technicalData.rsi.toFixed(1)}</div>
+                        </div>
+                    `;
+                }
+                
+                // MACD
+                if (technicalData.macd) {
+                    const macdClass = technicalData.macd.histogram > 0 ? 'macd-bullish' : 'macd-bearish';
+                    indicatorsHTML += `
+                        <div class="indicator-item">
+                            <div class="indicator-label">MACD</div>
+                            <div class="indicator-value ${macdClass}">${technicalData.macd.histogram.toFixed(3)}</div>
+                        </div>
+                    `;
+                }
+                
+                // Bollinger Bands
+                if (technicalData.bollinger) {
+                    const currentPrice = this.results.find(s => s.symbol === symbol)?.price || 0;
+                    const bbPosition = currentPrice > technicalData.bollinger.upper ? 'Above' :
+                                     currentPrice < technicalData.bollinger.lower ? 'Below' : 'Inside';
+                    indicatorsHTML += `
+                        <div class="indicator-item">
+                            <div class="indicator-label">BB Position</div>
+                            <div class="indicator-value">${bbPosition}</div>
+                        </div>
+                    `;
+                }
+                
+                // Volume Analysis
+                if (technicalData.volumeAnalysis) {
+                    const volumeClass = technicalData.volumeAnalysis.signal === 'high' ? 'volume-high' :
+                                      technicalData.volumeAnalysis.signal === 'low' ? 'volume-low' : 'volume-normal';
+                    indicatorsHTML += `
+                        <div class="indicator-item">
+                            <div class="indicator-label">Volume</div>
+                            <div class="indicator-value ${volumeClass}">${technicalData.volumeAnalysis.volumeRatio.toFixed(1)}x</div>
+                        </div>
+                    `;
+                }
+                
+                indicatorGrid.innerHTML = indicatorsHTML;
+                technicalPanel.style.display = 'block';
+            }
+            
+            updatePatternIndicators(symbol) {
+                const patterns = this.patternData.get(symbol) || [];
+                const patternList = document.getElementById('patternList');
+                const patternPanel = document.getElementById('patternIndicators');
+                
+                if (patterns.length === 0) {
+                    patternPanel.style.display = 'none';
+                    return;
+                }
+                
+                let patternsHTML = '';
+                patterns.forEach(pattern => {
+                    const statusClass = pattern.confidence > 0.5 ? 'pattern-detected' : 'pattern-not-detected';
+                    patternsHTML += `
+                        <div class="pattern-item">
+                            <div class="pattern-name">${pattern.name}</div>
+                            <div class="pattern-status ${statusClass}">${(pattern.confidence * 100).toFixed(0)}%</div>
+                        </div>
+                    `;
+                });
+                
+                patternList.innerHTML = patternsHTML;
+                patternPanel.style.display = 'block';
+            }
+            
+            updateRiskManagement(symbol) {
+                const riskData = this.riskData.get(symbol);
+                if (!riskData) return;
+                
+                const riskScore = document.getElementById('riskScore');
+                const riskFactors = document.getElementById('riskFactors');
+                const riskPanel = document.getElementById('riskManagement');
+                
+                // Set risk score
+                const riskClass = riskData.score < 30 ? 'risk-low' : 
+                                riskData.score > 70 ? 'risk-high' : 'risk-medium';
+                riskScore.textContent = riskData.score.toFixed(0);
+                riskScore.className = `risk-score ${riskClass}`;
+                
+                // Set risk factors
+                let factorsHTML = '';
+                riskData.factors.forEach(factor => {
+                    const factorClass = factor.impact === 'positive' ? 'risk-factor-positive' : 'risk-factor-negative';
+                    factorsHTML += `
+                        <div class="risk-factor ${factorClass}">${factor.factor}</div>
+                    `;
+                });
+                
+                riskFactors.innerHTML = factorsHTML;
+                riskPanel.style.display = 'block';
+            }
+            
+            updateMarketSentiment(symbol) {
+                const sentiment = this.sentimentData.get(symbol);
+                if (!sentiment) return;
+                
+                const sentimentFill = document.getElementById('sentimentFill');
+                const sentimentText = document.getElementById('sentimentText');
+                const sentimentPanel = document.getElementById('marketSentiment');
+                
+                // Set sentiment meter
+                sentimentFill.style.width = `${sentiment.score}%`;
+                sentimentFill.className = `sentiment-fill ${
+                    sentiment.score > 60 ? 'sentiment-bullish' : 
+                    sentiment.score < 40 ? 'sentiment-bearish' : 'sentiment-neutral'
+                }`;
+                
+                sentimentText.textContent = sentiment.text;
+                sentimentPanel.style.display = 'block';
+            }
+            
+
+            
+            getTrendClass(trend) {
+                switch(trend) {
+                    case 'UP': return 'trend-up';
+                    case 'DN': return 'trend-down';
+                    default: return 'trend-neutral';
+                }
+            }
+            
+            formatNumber(num) {
+                if (num >= 1000000) {
+                    return (num / 1000000).toFixed(1) + 'M';
+                } else if (num >= 1000) {
+                    return (num / 1000).toFixed(1) + 'K';
+                }
+                return num.toLocaleString();
+            }
+            
+            updateStatus() {
+                const indicator = document.getElementById('statusIndicator');
+                const statusText = document.getElementById('statusText');
+                
+                if (this.isScanning) {
+                    indicator.className = 'status-indicator status-active';
+                    statusText.textContent = 'Scanning...';
+                } else {
+                    indicator.className = 'status-indicator status-inactive';
+                    statusText.textContent = 'Ready';
+                }
+            }
+            
+            showLoading(show) {
+                const spinner = document.getElementById('loadingSpinner');
+                const table = document.getElementById('resultsTable');
+                
+                if (show) {
+                    spinner.style.display = 'block';
+                    table.style.display = 'none';
+                } else {
+                    spinner.style.display = 'none';
+                    table.style.display = 'block';
+                }
+            }
+        }
+        
+        // Global functions for alert popup
+        function closeAlert() {
+            window.orbScanner.closeAlert();
+        }
+        
+        function viewDetails() {
+            closeAlert();
+        }
+        
+        // Initialize scanner when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            window.orbScanner = new ORBScannerThreeAlerts();
+        });
+    </script>
+</body>
+</html> 
