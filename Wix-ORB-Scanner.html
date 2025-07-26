@@ -792,13 +792,15 @@
                                         <th>ORB Low</th>
                                         <th>VWAP</th>
                                         <th>EMA9</th>
+                                        <th>Float</th>
+                                        <th>Sector</th>
                                         <th>News</th>
                                         <th>Alerts</th>
                                     </tr>
                                 </thead>
                                 <tbody id="resultsBody">
                                     <tr>
-                                        <td colspan="11" class="text-center text-muted">
+                                        <td colspan="13" class="text-center text-muted">
                                             Auto-scanning Monday-Friday during market hours...
                                         </td>
                                     </tr>
@@ -869,7 +871,7 @@
         // =============================================================================
         // THREE SEPARATE ALERTS ORB SCANNER - INDEPENDENT ALERT TYPES
         // =============================================================================
-        const SECURE_API_BASE_URL = 'https://king-prawn-app-zavmj.ondigitalocean.app';
+        const API_BASE_URL = 'https://jellyfish-app-puk7k.ondigitalocean.app';
         const DISCORD_WEBHOOK_URL = 'https://discord.com/api/webhooks/1394093082416255008/9AzNYp-1kZnbm4a4m1PmAsLh8D3AGGeL4PxsQL5unT1f6k0P_NMof3wa7tU_LwfF0GGg';
         
         class ORBScannerThreeAlerts {
@@ -926,6 +928,24 @@
             
             initializeEventListeners() {
                 // Auto-scan starts automatically, no manual controls needed
+                // Add filter change listeners
+                document.getElementById('newsFilter').addEventListener('change', () => {
+                    if (this.results.length > 0) {
+                        this.updateResults();
+                    }
+                });
+                
+                document.getElementById('vwapFilter').addEventListener('change', () => {
+                    if (this.results.length > 0) {
+                        this.updateResults();
+                    }
+                });
+                
+                document.getElementById('ema9Filter').addEventListener('change', () => {
+                    if (this.results.length > 0) {
+                        this.updateResults();
+                    }
+                });
             }
             
             isMarketOpen() {
@@ -1190,11 +1210,15 @@
                 this.showLoading(true);
                 
                 try {
-                    const gainersResponse = await fetch(`${SECURE_API_BASE_URL}/api/gainers`);
-                    const gainersData = await gainersResponse.json();
+                    const scanResponse = await fetch(`${API_BASE_URL}/api/scan`);
+                    const scanData = await scanResponse.json();
                     
-                    if (!gainersData.tickers || gainersData.tickers.length === 0) {
-                        throw new Error('No gainers data available');
+                    if (!scanData.success) {
+                        throw new Error(scanData.error || 'Scan failed');
+                    }
+                    
+                    if (!scanData.results || scanData.results.length === 0) {
+                        throw new Error('No qualifying stocks found');
                     }
                     
                     // Get filter settings
@@ -1204,71 +1228,48 @@
                     
                     const results = [];
                     
-                    for (const ticker of gainersData.tickers.slice(0, 20)) {
+                    for (const stock of scanData.results) {
                         try {
-                            const result = this.processTickerData(ticker, newsFilter, vwapFilter, ema9Filter);
+                            const result = this.processStockData(stock, newsFilter, vwapFilter, ema9Filter);
                             if (result) {
                                 results.push(result);
                             }
                         } catch (error) {
-                            console.warn(`Error processing ${ticker.ticker}:`, error);
+                            console.warn(`Error processing ${stock.symbol}:`, error);
                         }
                     }
                     
                     results.sort((a, b) => b.dollar_volume - a.dollar_volume);
                     
                     this.results = results;
-                    this.lastScanTime = new Date().toISOString();
+                    this.lastScanTime = scanData.scan_time || new Date().toISOString();
                     this.updateResults();
-                    this.updateStatus();
+                    await this.updateStatus();
                     this.checkForAlerts(results);
                     
                 } catch (error) {
                     console.error('Scan error:', error);
+                    this.showErrorMessage(error.message);
                 } finally {
                     this.isScanning = false;
                     this.showLoading(false);
-                    this.updateStatus();
+                    await this.updateStatus();
                 }
             }
             
-            processTickerData(ticker, newsFilter, vwapFilter, ema9Filter) {
+            processStockData(stock, newsFilter, vwapFilter, ema9Filter) {
                 try {
-                    const symbol = ticker.ticker;
-                    const day = ticker.day;
-                    
-                    if (!day) return null;
-                    
-                    const currentPrice = day.c;
-                    const openPrice = day.o;
-                    const priceChange = ((currentPrice - openPrice) / openPrice) * 100;
-                    const volume = day.v;
-                    const dollarVolume = volume * currentPrice;
-                    const orbHigh = day.h;
-                    const orbLow = day.l;
-                    const vwap = day.vw;
+                    const symbol = stock.symbol;
+                    const currentPrice = stock.price;
+                    const priceChange = stock.change_percent;
+                    const volume = stock.volume;
+                    const dollarVolume = stock.dollar_volume;
+                    const orbHigh = stock.orb_high;
+                    const orbLow = stock.orb_low;
+                    const vwap = stock.vwap;
                     
                     // Calculate EMA9 (simplified)
-                    const ema9 = this.calculateEMA9(day);
-                    
-                    // =============================================================================
-                    // MASTER FILTERS - Business Rules (Apply to Everyone)
-                    // =============================================================================
-                    
-                    // Master Filter 1: Minimum 1M volume
-                    if (volume < 1000000) {
-                        return null;
-                    }
-                    
-                    // Master Filter 2: Minimum 30% gain on the day
-                    if (priceChange < 30) {
-                        return null;
-                    }
-                    
-                    // Master Filter 3: Price range $0.50 - $15.00
-                    if (currentPrice < 0.50 || currentPrice > 15.00) {
-                        return null;
-                    }
+                    const ema9 = this.calculateEMA9(stock);
                     
                     // =============================================================================
                     // QUICK FILTERS - User Preferences (Personal Settings)
@@ -1284,31 +1285,33 @@
                     if (newsFilter === 'yes' && !hasNews) return null;
                     if (newsFilter === 'no' && hasNews) return null;
                     
-                    const trend = currentPrice > openPrice ? 'UP' : currentPrice < openPrice ? 'DN' : '-';
-                    
                     return {
                         symbol: symbol,
-                        price: Math.round(currentPrice * 100) / 100,
-                        change_percent: Math.round(priceChange * 100) / 100,
+                        price: currentPrice,
+                        change_percent: priceChange,
                         volume: volume,
-                        dollar_volume: Math.round(dollarVolume),
-                        orb_high: Math.round(orbHigh * 100) / 100,
-                        orb_low: Math.round(orbLow * 100) / 100,
-                        vwap: Math.round(vwap * 100) / 100,
-                        ema9: Math.round(ema9 * 100) / 100,
-                        trend: trend,
-                        has_news: hasNews
+                        dollar_volume: dollarVolume,
+                        orb_high: orbHigh,
+                        orb_low: orbLow,
+                        vwap: vwap,
+                        ema9: ema9,
+                        trend: stock.trend || '-',
+                        has_news: hasNews,
+                        float: stock.float,
+                        sector: stock.sector,
+                        last_vs_high: stock.last_vs_high,
+                        last_vs_vwap: stock.last_vs_vwap
                     };
                     
                 } catch (error) {
-                    console.warn(`Error processing ticker data:`, error);
+                    console.warn(`Error processing stock data:`, error);
                     return null;
                 }
             }
             
-            calculateEMA9(day) {
-                // Simplified EMA9 calculation
-                return day.c * 0.9 + day.o * 0.1;
+            calculateEMA9(stock) {
+                // Simplified EMA9 calculation using current price and VWAP
+                return stock.price * 0.9 + stock.vwap * 0.1;
             }
             
             // Advanced Technical Indicators
@@ -1572,7 +1575,7 @@
                 if (this.results.length === 0) {
                     tbody.innerHTML = `
                         <tr>
-                            <td colspan="11" class="text-center text-muted">
+                            <td colspan="13" class="text-center text-muted">
                                 No qualifying stocks found.
                             </td>
                         </tr>
@@ -1603,6 +1606,8 @@
                             <td>$${stock.orb_low}</td>
                             <td>$${stock.vwap}</td>
                             <td>$${stock.ema9}</td>
+                            <td>${stock.float ? this.formatNumber(stock.float) : '-'}</td>
+                            <td>${stock.sector || '-'}</td>
                             <td>
                                 ${stock.has_news ? '<i class="fas fa-newspaper text-success"></i>' : '<i class="fas fa-minus text-muted"></i>'}
                             </td>
@@ -1693,6 +1698,30 @@
                     <div class="detail-item">
                         <div class="detail-label">EMA9</div>
                         <div class="detail-value">$${stock.ema9}</div>
+                    </div>
+                    
+                    <div class="detail-item">
+                        <div class="detail-label">Float</div>
+                        <div class="detail-value">${stock.float ? this.formatNumber(stock.float) : 'N/A'}</div>
+                    </div>
+                    
+                    <div class="detail-item">
+                        <div class="detail-label">Sector</div>
+                        <div class="detail-value">${stock.sector || 'N/A'}</div>
+                    </div>
+                    
+                    <div class="detail-item">
+                        <div class="detail-label">Last vs High</div>
+                        <div class="detail-value ${stock.last_vs_high >= 0 ? 'trend-up' : 'trend-down'}">
+                            ${stock.last_vs_high >= 0 ? '+' : ''}${stock.last_vs_high}%
+                        </div>
+                    </div>
+                    
+                    <div class="detail-item">
+                        <div class="detail-label">Last vs VWAP</div>
+                        <div class="detail-value ${stock.last_vs_vwap >= 0 ? 'trend-up' : 'trend-down'}">
+                            ${stock.last_vs_vwap >= 0 ? '+' : ''}${stock.last_vs_vwap}%
+                        </div>
                     </div>
                     
                     <div class="detail-item">
@@ -1913,7 +1942,7 @@
                 return num.toLocaleString();
             }
             
-            updateStatus() {
+            async updateStatus() {
                 const indicator = document.getElementById('statusIndicator');
                 const statusText = document.getElementById('statusText');
                 
@@ -1923,6 +1952,19 @@
                 } else {
                     indicator.className = 'status-indicator status-inactive';
                     statusText.textContent = 'Ready';
+                    
+                    // Get server status
+                    try {
+                        const statusResponse = await fetch(`${API_BASE_URL}/api/status`);
+                        const statusData = await statusResponse.json();
+                        
+                        if (statusData.scanning) {
+                            indicator.className = 'status-indicator status-active';
+                            statusText.textContent = 'Server Scanning...';
+                        }
+                    } catch (error) {
+                        console.warn('Could not fetch server status:', error);
+                    }
                 }
             }
             
@@ -1937,6 +1979,17 @@
                     spinner.style.display = 'none';
                     table.style.display = 'block';
                 }
+            }
+            
+            showErrorMessage(message) {
+                const tbody = document.getElementById('resultsBody');
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="11" class="text-center text-danger">
+                            <i class="fas fa-exclamation-triangle"></i> ${message}
+                        </td>
+                    </tr>
+                `;
             }
         }
         
